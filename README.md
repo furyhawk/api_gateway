@@ -114,3 +114,41 @@ Optional admin auth:
 - Run lint: `uv run ruff check .`
 - Add dependency: `uv add <package>`
 - Add dev dependency: `uv add --dev <package>`
+
+## Container (Docker or Podman) + Makefile
+The repository includes a containerized workflow via `Dockerfile` and `Makefile`.
+
+### Prerequisites
+- Install either Docker or Podman.
+- By default, Makefile uses Podman when available; otherwise Docker.
+
+### Build Image
+```bash
+make build
+```
+
+### Run Container
+```bash
+make run
+```
+
+Gateway will be available at `http://127.0.0.1:8000`.
+
+### Stop and Inspect
+```bash
+make logs
+make stop
+```
+
+### Useful Variables
+- `CONTAINER_ENGINE=docker` (or `podman`)
+- `PORT=8080`
+- `IMAGE_NAME=openapi-api-gateway`
+- `IMAGE_TAG=latest`
+- `ENV_FILE=.env`
+
+Example:
+```bash
+make build CONTAINER_ENGINE=docker IMAGE_TAG=dev
+make run CONTAINER_ENGINE=docker PORT=8080 ENV_FILE=.env
+```

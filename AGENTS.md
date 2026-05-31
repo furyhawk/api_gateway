@@ -4,7 +4,7 @@ Instructions for AI coding agents in this workspace.
 
 ## Project Snapshot
 - Primary artifact: `openapi_json/lta_datamall_openapi_v0-1-1.json`
-- Repository scope today: OpenAPI specification only (no server implementation files, tests, CI, or package manager config in repo)
+- Repository scope: OpenAPI contract plus a FastAPI gateway framework scaffold (`src/`, `config/`, `pyproject.toml`)
 - Domain: LTA DataMall bus APIs exposed via a versioned API gateway
 
 ## Source of Truth
@@ -36,7 +36,7 @@ When editing or adding endpoints, prioritize these improvements:
 ## Validation Checklist
 Run these checks after spec edits (ad hoc, since no build system is committed):
 1. JSON validity check:
-   - `python -m json.tool openapi_json/lta_datamall_openapi_v0-1-1.json >/dev/null`
+  - `uv run python -m json.tool openapi_json/lta_datamall_openapi_v0-1-1.json >/dev/null`
 2. Optional structural check (if available locally):
    - `npx @redocly/cli lint openapi_json/lta_datamall_openapi_v0-1-1.json`
 

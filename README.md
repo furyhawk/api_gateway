@@ -21,18 +21,23 @@ This repository now includes a lightweight, configurable API gateway framework b
 - `openapi_json/lta_datamall_openapi_v0-1-1.json`: external OpenAPI contract
 
 ## Quick Start
-1. Create and activate a virtual environment.
-2. Install dependencies:
+1. Install `uv` if not already installed:
 
 ```bash
-pip install -e .
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+2. Sync dependencies and create the project virtual environment:
+
+```bash
+uv sync
 ```
 
 3. Update `config/gateway.yaml` with real upstream URLs.
-4. Run the gateway:
+4. Run the gateway with the managed environment:
 
 ```bash
-uvicorn gateway_framework.main:app --reload --app-dir src
+uv run uvicorn gateway_framework.main:app --reload --app-dir src
 ```
 
 5. Open the docs:
@@ -79,3 +84,9 @@ Notes:
 - Add auth/rate limiting middleware for production.
 - Add OpenAPI linting in CI (for example, Redocly CLI).
 - Add contract tests for every configured route.
+
+## Common uv Commands
+- Run tests: `uv run pytest`
+- Run lint: `uv run ruff check .`
+- Add dependency: `uv add <package>`
+- Add dev dependency: `uv add --dev <package>`

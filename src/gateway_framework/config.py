@@ -12,6 +12,9 @@ class GatewaySettings(BaseModel):
     version: str = "0.1.0"
     description: str = "Configurable API gateway"
     external_openapi_file: str | None = None
+    cache_enabled: bool = False
+    cache_ttl_seconds: float = Field(default=30.0, ge=1.0, le=3600.0)
+    cache_max_entries: int = Field(default=500, ge=1, le=10000)
     require_api_key: bool = False
     api_keys_file: str = "config/api_keys.json"
     admin_api_key_env: str = "ADMIN_API_KEY"

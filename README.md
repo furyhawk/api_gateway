@@ -56,6 +56,9 @@ settings:
   version: string
   description: string
   external_openapi_file: path/to/openapi.json
+  cache_enabled: false
+  cache_ttl_seconds: 30
+  cache_max_entries: 500
   require_api_key: false
   api_keys_file: config/api_keys.json
   admin_api_key_env: ADMIN_API_KEY
@@ -99,6 +102,13 @@ Optional admin auth:
 - Enable gateway key checks by setting `settings.require_api_key: true`.
 - Clients then must send `x-api-key: <key>` on proxied route requests.
 - Create keys from the admin portal or `POST /admin/api-keys`.
+
+## Response Cache
+- Enable cache with `settings.cache_enabled: true`.
+- Configure TTL with `settings.cache_ttl_seconds`.
+- Configure memory bound with `settings.cache_max_entries`.
+- Cache currently applies to proxied `GET`/`HEAD` responses with `2xx` status.
+- Gateway adds `x-gateway-cache: MISS` for first fetch and `x-gateway-cache: HIT` for cached responses.
 
 ## Scaling and Configurability Guidance
 - Add routes through config, not code, for repeatable deployments.

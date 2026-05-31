@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from .admin import get_admin_assets_dir, render_admin_portal, require_admin_access
 from .api_keys import ApiKeyStore
+from .cache import ResponseCache
 from .config import GatewayConfig, RouteConfig, load_gateway_config
 from .proxy import proxy_request
 
@@ -165,6 +166,10 @@ def _register_management_routes(app: FastAPI) -> None:
         request.app.state.gateway_config = reloaded
         request.app.state.api_key_store = ApiKeyStore(Path(reloaded.settings.api_keys_file))
         request.app.state.api_key_store.ensure_exists()
+        request.app.state.response_cache = ResponseCache(
+            ttl_seconds=reloaded.settings.cache_ttl_seconds,
+            max_entries=reloaded.settings.cache_max_entries,
+        )
         request.app.state.admin_api_key = os.getenv(reloaded.settings.admin_api_key_env, "")
         return {"status": "saved"}
 
@@ -202,6 +207,10 @@ def create_app(config_path: str | None = None) -> FastAPI:
         app.state.http_client = httpx.AsyncClient()
         app.state.api_key_store = ApiKeyStore(Path(gateway_config.settings.api_keys_file))
         app.state.api_key_store.ensure_exists()
+        app.state.response_cache = ResponseCache(
+            ttl_seconds=gateway_config.settings.cache_ttl_seconds,
+            max_entries=gateway_config.settings.cache_max_entries,
+        )
         app.state.admin_api_key = os.getenv(gateway_config.settings.admin_api_key_env, "")
         try:
             yield

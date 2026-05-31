@@ -21,6 +21,23 @@ HOP_BY_HOP_HEADERS = {
 }
 
 
+def _cache_key(request: Request, target_url: str) -> str:
+    params = "&".join(f"{k}={v}" for k, v in request.query_params.multi_items())
+    vary_accept = request.headers.get("accept", "")
+    vary_auth = request.headers.get("authorization", "")
+    return f"{request.method}|{target_url}|{params}|{vary_accept}|{vary_auth}"
+
+
+def _get_cache_from_request(request: Request):
+    app = request.scope.get("app")
+    if app is None:
+        return None
+    state = getattr(app, "state", None)
+    if state is None:
+        return None
+    return getattr(state, "response_cache", None)
+
+
 def build_target_path(request: Request, route: RouteConfig) -> str:
     incoming_path = request.url.path
 
@@ -68,6 +85,26 @@ async def proxy_request(
     target_path = build_target_path(request, route)
     target_url = urljoin(str(upstream.base_url), target_path.lstrip("/"))
 
+    cache = None
+    cache_key = ""
+    cache_enabled = (
+        config.settings.cache_enabled and request.method in {"GET", "HEAD"}
+    )
+    if cache_enabled:
+        cache = _get_cache_from_request(request)
+        if cache is not None:
+            cache_key = _cache_key(request, target_url)
+            cached = cache.get(cache_key)
+            if cached is not None:
+                headers = dict(cached.headers)
+                headers["x-gateway-cache"] = "HIT"
+                return Response(
+                    content=cached.body,
+                    status_code=cached.status_code,
+                    headers=headers,
+                    media_type=cached.media_type,
+                )
+
     try:
         upstream_response = await client.request(
             method=request.method,
@@ -88,9 +125,24 @@ async def proxy_request(
             media_type="application/json",
         )
 
-    return Response(
+    headers = _response_headers(upstream_response)
+    if cache_enabled:
+        headers["x-gateway-cache"] = "MISS"
+
+    response = Response(
         content=upstream_response.content,
         status_code=upstream_response.status_code,
-        headers=_response_headers(upstream_response),
+        headers=headers,
         media_type=upstream_response.headers.get("content-type"),
     )
+
+    if cache_enabled and cache is not None and 200 <= upstream_response.status_code < 300:
+        cache.set(
+            cache_key,
+            status_code=upstream_response.status_code,
+            headers=_response_headers(upstream_response),
+            body=upstream_response.content,
+            media_type=upstream_response.headers.get("content-type"),
+        )
+
+    return response

@@ -3,6 +3,9 @@ settings:
   version: 0.1.0
   description: Configurable gateway for OpenAPI-based upstream services
   external_openapi_file: openapi_json/lta_datamall_openapi_v0-1-1.json
+  require_api_key: false
+  api_keys_file: config/api_keys.json
+  admin_api_key_env: ADMIN_API_KEY
 
 upstreams:
   lta_datamall:

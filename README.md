@@ -7,6 +7,9 @@ This repository now includes a lightweight, configurable API gateway framework b
 - Configurable upstream targets and per-upstream timeout settings
 - OpenAPI docs for gateway endpoints via FastAPI (`/docs`)
 - Optional serving of an external OpenAPI contract (`/openapi/external.json`)
+- Administrative portal at `/admin/portal`
+- Runtime configuration editor via admin endpoints
+- API key creation/list/revocation with optional route protection
 - Built-in management endpoints:
   - `GET /healthz`
   - `GET /readyz`
@@ -52,6 +55,9 @@ settings:
   version: string
   description: string
   external_openapi_file: path/to/openapi.json
+  require_api_key: false
+  api_keys_file: config/api_keys.json
+  admin_api_key_env: ADMIN_API_KEY
 
 upstreams:
   service_name:
@@ -73,6 +79,24 @@ Notes:
 - `path` is the public gateway path.
 - `upstream_path` overrides forwarded path.
 - `strip_prefix` removes a leading path segment before forwarding.
+
+## Administrative Portal and Dashboard
+- Admin UI: `GET /admin/portal`
+- Admin summary: `GET /admin/dashboard`
+- Get config YAML: `GET /admin/config`
+- Save config YAML: `PUT /admin/config`
+- List API keys: `GET /admin/api-keys`
+- Create API key: `POST /admin/api-keys` with body `{"name":"client-name"}`
+- Revoke API key: `DELETE /admin/api-keys/{key_id}`
+
+Optional admin auth:
+- Set environment variable `ADMIN_API_KEY` before startup.
+- Send header `x-admin-key: <your-admin-key>` to admin endpoints.
+
+## API Key Protection for Gateway Routes
+- Enable gateway key checks by setting `settings.require_api_key: true`.
+- Clients then must send `x-api-key: <key>` on proxied route requests.
+- Create keys from the admin portal or `POST /admin/api-keys`.
 
 ## Scaling and Configurability Guidance
 - Add routes through config, not code, for repeatable deployments.

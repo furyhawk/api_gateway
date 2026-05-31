@@ -12,6 +12,9 @@ class GatewaySettings(BaseModel):
     version: str = "0.1.0"
     description: str = "Configurable API gateway"
     external_openapi_file: str | None = None
+    require_api_key: bool = False
+    api_keys_file: str = "config/api_keys.json"
+    admin_api_key_env: str = "ADMIN_API_KEY"
 
 
 class UpstreamConfig(BaseModel):

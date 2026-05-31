@@ -20,6 +20,7 @@ This repository now includes a lightweight, configurable API gateway framework b
 - `src/gateway_framework/proxy.py`: request forwarding/proxy logic
 - `src/gateway_framework/config.py`: config schema and loader
 - `src/gateway_framework/main.py`: ASGI entrypoint
+- `src/gateway_framework/static/admin/`: scalable portal frontend assets (`index.html`, `styles.css`, `app.js`)
 - `config/gateway.yaml`: route and upstream configuration
 - `openapi_json/lta_datamall_openapi_v0-1-1.json`: external OpenAPI contract
 
@@ -82,6 +83,7 @@ Notes:
 
 ## Administrative Portal and Dashboard
 - Admin UI: `GET /admin/portal`
+- Admin static assets: `GET /admin/portal/assets/*`
 - Admin summary: `GET /admin/dashboard`
 - Get config YAML: `GET /admin/config`
 - Save config YAML: `PUT /admin/config`

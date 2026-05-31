@@ -98,6 +98,38 @@ routes:
 
 
 @pytest.mark.anyio
+async def test_admin_portal_and_assets_are_served(tmp_path) -> None:
+    config_file = tmp_path / "gateway.yaml"
+    config_file.write_text(
+        """
+upstreams:
+  demo:
+    base_url: https://example.com/
+routes:
+  - path: /api/v1/demo
+    methods: [GET]
+    upstream: demo
+""".strip(),
+        encoding="utf-8",
+    )
+
+    app = create_app(str(config_file))
+    _prepare_state(app, config_file)
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+        portal = await client.get("/admin/portal")
+        css = await client.get("/admin/portal/assets/styles.css")
+        js = await client.get("/admin/portal/assets/app.js")
+
+    assert portal.status_code == 200
+    assert "Gateway Portal" in portal.text
+    assert css.status_code == 200
+    assert "metrics-grid" in css.text
+    assert js.status_code == 200
+    assert "bootstrap" in js.text
+
+
+@pytest.mark.anyio
 async def test_admin_api_key_lifecycle(tmp_path) -> None:
     config_file = tmp_path / "gateway.yaml"
     config_file.write_text(

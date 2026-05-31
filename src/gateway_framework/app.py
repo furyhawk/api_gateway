@@ -10,9 +10,10 @@ import httpx
 import yaml
 from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from .admin import render_admin_portal, require_admin_access
+from .admin import get_admin_assets_dir, render_admin_portal, require_admin_access
 from .api_keys import ApiKeyStore
 from .config import GatewayConfig, RouteConfig, load_gateway_config
 from .proxy import proxy_request
@@ -212,6 +213,12 @@ def create_app(config_path: str | None = None) -> FastAPI:
         version=gateway_config.settings.version,
         description=gateway_config.settings.description,
         lifespan=lifespan,
+    )
+
+    app.mount(
+        "/admin/portal/assets",
+        StaticFiles(directory=get_admin_assets_dir()),
+        name="admin-portal-assets",
     )
 
     _register_management_routes(app)

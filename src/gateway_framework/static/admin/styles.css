@@ -1,0 +1,259 @@
+:root {
+  --bg0: #f0f5eb;
+  --bg1: #dde9d9;
+  --panel: #ffffff;
+  --ink: #203126;
+  --muted: #607567;
+  --line: #cfdbcd;
+  --primary: #16724d;
+  --primary-strong: #0f5f40;
+  --danger: #a33838;
+  --shadow: 0 12px 28px rgba(19, 35, 25, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: linear-gradient(145deg, var(--bg0) 0%, #f7faf5 45%, var(--bg1) 100%);
+  font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 25rem at -10% -5%, rgba(74, 145, 98, 0.25), transparent 65%),
+    radial-gradient(50rem 20rem at 120% 0%, rgba(22, 114, 77, 0.18), transparent 60%);
+}
+
+.layout {
+  position: relative;
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 2.25rem 1rem 2.5rem;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+}
+
+.subtitle {
+  margin-top: 0.5rem;
+  max-width: 62ch;
+  color: var(--muted);
+}
+
+.access-box,
+.panel,
+.metric-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+
+.access-box {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.access-box label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+input,
+textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fcfefb;
+  color: var(--ink);
+  padding: 0.7rem 0.8rem;
+  font-size: 0.95rem;
+}
+
+textarea {
+  min-height: 260px;
+  font-family: "JetBrains Mono", "IBM Plex Mono", monospace;
+  resize: vertical;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.metric-card {
+  padding: 0.9rem 1rem;
+}
+
+.metric-card h2 {
+  margin: 0;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+
+.metric-card p {
+  margin: 0.4rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.panel {
+  padding: 1rem;
+}
+
+.panel-wide {
+  grid-row: span 2;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.actions,
+.row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.row {
+  margin-bottom: 0.6rem;
+}
+
+.btn {
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  padding: 0.58rem 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--primary-strong);
+}
+
+.btn.secondary {
+  background: #e8f2e7;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.btn.danger {
+  background: var(--danger);
+}
+
+.hint,
+.status {
+  margin: 0.45rem 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.list li {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  background: #fcfefb;
+}
+
+.list-tight li {
+  font-family: "JetBrains Mono", "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+}
+
+.pill {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: #f4faf2;
+}
+
+@media (max-width: 980px) {
+  .hero,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel-wide {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions,
+  .row {
+    flex-wrap: wrap;
+  }
+}

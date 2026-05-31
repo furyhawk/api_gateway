@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gateway Control Plane</title>
+    <link rel="stylesheet" href="/admin/portal/assets/styles.css" />
+  </head>
+  <body>
+    <div class="backdrop"></div>
+    <main class="layout">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Control Plane</p>
+          <h1>Gateway Portal</h1>
+          <p class="subtitle">Operational dashboard, live config control, and API key lifecycle in one scalable interface.</p>
+        </div>
+        <div class="access-box">
+          <label for="adminKey">Admin Key</label>
+          <input id="adminKey" type="password" placeholder="x-admin-key value" />
+          <button id="saveAdminKeyBtn" class="btn">Save Session Key</button>
+        </div>
+      </header>
+
+      <section class="metrics-grid" id="metricsGrid">
+        <article class="metric-card">
+          <h2>Routes</h2>
+          <p id="metricRoutes">-</p>
+        </article>
+        <article class="metric-card">
+          <h2>Upstreams</h2>
+          <p id="metricUpstreams">-</p>
+        </article>
+        <article class="metric-card">
+          <h2>API Key Guard</h2>
+          <p id="metricKeyGuard">-</p>
+        </article>
+        <article class="metric-card">
+          <h2>Admin Auth</h2>
+          <p id="metricAdminAuth">-</p>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel panel-wide">
+          <div class="panel-head">
+            <h2>Configuration Editor</h2>
+            <div class="actions">
+              <button id="loadConfigBtn" class="btn secondary">Load</button>
+              <button id="saveConfigBtn" class="btn">Save</button>
+            </div>
+          </div>
+          <p class="hint">YAML is validated before save. Structural route changes may require process restart.</p>
+          <textarea id="configText" spellcheck="false"></textarea>
+          <p id="configStatus" class="status"></p>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>API Key Management</h2>
+            <button id="refreshKeysBtn" class="btn secondary">Refresh</button>
+          </div>
+          <div class="row">
+            <input id="apiKeyName" placeholder="Key label (for example mobile-client)" />
+            <button id="createKeyBtn" class="btn">Create</button>
+          </div>
+          <p id="newKeyValue" class="status"></p>
+          <ul id="keysList" class="list"></ul>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>Gateway Routes</h2>
+            <button id="refreshRoutesBtn" class="btn secondary">Refresh</button>
+          </div>
+          <ul id="routesList" class="list list-tight"></ul>
+        </article>
+      </section>
+    </main>
+
+    <script src="/admin/portal/assets/app.js" defer></script>
+  </body>
+</html>

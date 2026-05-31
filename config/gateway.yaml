@@ -1,0 +1,27 @@
+settings:
+  title: LTA DataMall API Gateway
+  version: 0.1.0
+  description: Configurable gateway for OpenAPI-based upstream services
+  external_openapi_file: openapi_json/lta_datamall_openapi_v0-1-1.json
+
+upstreams:
+  lta_datamall:
+    base_url: https://api.example.com/
+    timeout_seconds: 20
+
+routes:
+  - path: /api/v1/bus-arrival
+    methods: [GET]
+    upstream: lta_datamall
+    upstream_path: /api/v1/bus-arrival
+    summary: Bus arrival passthrough
+    tags: [Bus]
+    operation_id: gateway_bus_arrival
+
+  - path: /api/v1/bus-services
+    methods: [GET]
+    upstream: lta_datamall
+    upstream_path: /api/v1/bus-services
+    summary: Bus services passthrough
+    tags: [Bus]
+    operation_id: gateway_bus_services

@@ -1,0 +1,86 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Literal
+
+import yaml
+from pydantic import AnyHttpUrl, BaseModel, Field, ValidationError, field_validator
+
+
+class GatewaySettings(BaseModel):
+    title: str = "OpenAPI API Gateway"
+    version: str = "0.1.0"
+    description: str = "Configurable API gateway"
+    external_openapi_file: str | None = None
+
+
+class UpstreamConfig(BaseModel):
+    base_url: AnyHttpUrl
+    timeout_seconds: float = Field(default=15.0, ge=0.1, le=120.0)
+
+
+class RouteConfig(BaseModel):
+    path: str
+    methods: list[Literal["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]]
+    upstream: str
+    upstream_path: str | None = None
+    strip_prefix: str | None = None
+    summary: str | None = None
+    tags: list[str] = Field(default_factory=lambda: ["Gateway"])
+    operation_id: str | None = None
+
+    @field_validator("path")
+    @classmethod
+    def validate_path(cls, value: str) -> str:
+        if not value.startswith("/"):
+            msg = "route path must start with '/'"
+            raise ValueError(msg)
+        return value
+
+    @field_validator("upstream_path")
+    @classmethod
+    def validate_upstream_path(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        if not value.startswith("/"):
+            msg = "upstream_path must start with '/'"
+            raise ValueError(msg)
+        return value
+
+    @field_validator("strip_prefix")
+    @classmethod
+    def validate_strip_prefix(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        if not value.startswith("/"):
+            msg = "strip_prefix must start with '/'"
+            raise ValueError(msg)
+        return value.rstrip("/")
+
+
+class GatewayConfig(BaseModel):
+    settings: GatewaySettings = Field(default_factory=GatewaySettings)
+    upstreams: dict[str, UpstreamConfig]
+    routes: list[RouteConfig]
+
+
+def load_gateway_config(config_path: str | Path) -> GatewayConfig:
+    path = Path(config_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Gateway config was not found: {path}")
+
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("Gateway config must be a YAML object")
+
+    try:
+        config = GatewayConfig.model_validate(raw)
+    except ValidationError as exc:
+        raise ValueError(f"Invalid gateway config: {exc}") from exc
+
+    unknown_upstreams = {route.upstream for route in config.routes} - set(config.upstreams)
+    if unknown_upstreams:
+        names = ", ".join(sorted(unknown_upstreams))
+        raise ValueError(f"Routes reference unknown upstreams: {names}")
+
+    return config

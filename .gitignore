@@ -36,3 +36,4 @@ htmlcov/
 # Local runtime/log artifacts
 *.log
 *.pid
+config/api_keys.json

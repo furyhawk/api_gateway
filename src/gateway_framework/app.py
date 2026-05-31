@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import AsyncGenerator, Callable
+from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Callable
 
 import httpx
 from fastapi import FastAPI, Request
@@ -96,20 +97,21 @@ def create_app(config_path: str | None = None) -> FastAPI:
     resolved_path = _resolve_config_path(config_path)
     gateway_config = load_gateway_config(resolved_path)
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+        app.state.gateway_config = gateway_config
+        app.state.http_client = httpx.AsyncClient()
+        try:
+            yield
+        finally:
+            await app.state.http_client.aclose()
+
     app = FastAPI(
         title=gateway_config.settings.title,
         version=gateway_config.settings.version,
         description=gateway_config.settings.description,
+        lifespan=lifespan,
     )
-
-    @app.on_event("startup")
-    async def startup() -> None:
-        app.state.http_client = httpx.AsyncClient()
-        app.state.gateway_config = gateway_config
-
-    @app.on_event("shutdown")
-    async def shutdown() -> None:
-        await app.state.http_client.aclose()
 
     _register_management_routes(app)
     _register_dynamic_routes(app, gateway_config)

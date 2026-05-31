@@ -93,6 +93,9 @@ Notes:
 - List API keys: `GET /admin/api-keys`
 - Create API key: `POST /admin/api-keys` with body `{"name":"client-name"}`
 - Revoke API key: `DELETE /admin/api-keys/{key_id}`
+- Cache status: `GET /admin/cache`
+- Invalidate cache by route/query fragment: `POST /admin/cache/invalidate`
+- Clear all cache entries: `DELETE /admin/cache`
 
 Optional admin auth:
 - Set environment variable `ADMIN_API_KEY` before startup.
@@ -109,6 +112,8 @@ Optional admin auth:
 - Configure memory bound with `settings.cache_max_entries`.
 - Cache currently applies to proxied `GET`/`HEAD` responses with `2xx` status.
 - Gateway adds `x-gateway-cache: MISS` for first fetch and `x-gateway-cache: HIT` for cached responses.
+- Admin invalidation payload example:
+  - `{"path": "/api/v1/bus-arrival", "method": "GET", "query_contains": "BusStopCode=12345"}`
 
 ## Scaling and Configurability Guidance
 - Add routes through config, not code, for repeatable deployments.

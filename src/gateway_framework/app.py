@@ -30,6 +30,12 @@ class ApiKeyCreateRequest(BaseModel):
     name: str
 
 
+class CacheInvalidateRequest(BaseModel):
+    path: str
+    method: str = "GET"
+    query_contains: str | None = None
+
+
 def _resolve_config_path(explicit_path: str | None = None) -> str:
     if explicit_path:
         return explicit_path
@@ -122,14 +128,57 @@ def _register_management_routes(app: FastAPI) -> None:
     async def admin_dashboard(request: Request) -> dict[str, object]:
         require_admin_access(request)
         cfg: GatewayConfig = request.app.state.gateway_config
+        cache: ResponseCache = request.app.state.response_cache
         return {
             "title": cfg.settings.title,
             "version": cfg.settings.version,
             "require_api_key": cfg.settings.require_api_key,
             "admin_api_key_required": bool(request.app.state.admin_api_key),
+            "cache_enabled": cfg.settings.cache_enabled,
+            "cache_entries": cache.size(),
+            "cache_ttl_seconds": cfg.settings.cache_ttl_seconds,
+            "cache_max_entries": cfg.settings.cache_max_entries,
             "upstreams": sorted(cfg.upstreams.keys()),
             "routes_count": len(cfg.routes),
             "api_keys_file": str(request.app.state.api_key_store.path),
+        }
+
+    @app.get("/admin/cache", tags=["Admin"], summary="Get cache status")
+    async def get_cache_status(request: Request) -> dict[str, object]:
+        require_admin_access(request)
+        cfg: GatewayConfig = request.app.state.gateway_config
+        cache: ResponseCache = request.app.state.response_cache
+        return {
+            "enabled": cfg.settings.cache_enabled,
+            "ttl_seconds": cfg.settings.cache_ttl_seconds,
+            "max_entries": cfg.settings.cache_max_entries,
+            "entries": cache.size(),
+        }
+
+    @app.delete("/admin/cache", tags=["Admin"], summary="Clear all cached responses")
+    async def clear_cache(request: Request) -> dict[str, int]:
+        require_admin_access(request)
+        cache: ResponseCache = request.app.state.response_cache
+        cleared = cache.size()
+        cache.clear()
+        return {"cleared_entries": cleared}
+
+    @app.post("/admin/cache/invalidate", tags=["Admin"], summary="Invalidate cache by route fragment")
+    async def invalidate_cache(
+        request: Request,
+        payload: CacheInvalidateRequest = Body(...),
+    ) -> dict[str, object]:
+        require_admin_access(request)
+        cache: ResponseCache = request.app.state.response_cache
+        fragments = [f"{payload.method.upper()}|", payload.path]
+        if payload.query_contains:
+            fragments.append(payload.query_contains)
+        invalidated = cache.invalidate_by_contains(fragments)
+        return {
+            "invalidated_entries": invalidated,
+            "method": payload.method.upper(),
+            "path": payload.path,
+            "query_contains": payload.query_contains,
         }
 
     @app.get("/admin/config", tags=["Admin"], summary="Get active gateway YAML config")

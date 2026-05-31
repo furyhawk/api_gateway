@@ -8,6 +8,7 @@ import pytest
 
 from gateway_framework.api_keys import ApiKeyStore
 from gateway_framework.app import create_app
+from gateway_framework.cache import ResponseCache
 from gateway_framework.config import load_gateway_config
 
 
@@ -19,6 +20,7 @@ def _prepare_state(app, config_file: Path) -> None:
   app.state.gateway_config_path = Path(config_file)
   app.state.admin_api_key = ""
   app.state.http_client = httpx.AsyncClient(transport=httpx.MockTransport(failing_upstream))
+  app.state.response_cache = ResponseCache(ttl_seconds=60, max_entries=100)
   store = ApiKeyStore(Path(config_file.parent / "api_keys.json"))
   store.ensure_exists()
   app.state.api_key_store = store
@@ -203,3 +205,61 @@ routes:
 
         valid = await client.get("/api/v1/demo", headers={"x-api-key": api_key})
         assert valid.status_code == 502
+
+
+@pytest.mark.anyio
+async def test_admin_cache_controls(tmp_path) -> None:
+    config_file = tmp_path / "gateway.yaml"
+    config_file.write_text(
+        """
+settings:
+  cache_enabled: true
+upstreams:
+  demo:
+    base_url: https://example.com/
+routes:
+  - path: /api/v1/demo
+    methods: [GET]
+    upstream: demo
+""".strip(),
+        encoding="utf-8",
+    )
+
+    app = create_app(str(config_file))
+    _prepare_state(app, config_file)
+    app.state.response_cache.set(
+        "GET|https://example.com/api/v1/demo|a=1||",
+        status_code=200,
+        headers={"content-type": "application/json"},
+        body=b"{}",
+        media_type="application/json",
+    )
+
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+        status_before = await client.get("/admin/cache")
+        assert status_before.status_code == 200
+        assert status_before.json()["entries"] == 1
+
+        invalidated = await client.post(
+            "/admin/cache/invalidate",
+            json={"path": "/api/v1/demo", "method": "GET"},
+        )
+        assert invalidated.status_code == 200
+        assert invalidated.json()["invalidated_entries"] == 1
+
+        app.state.response_cache.set(
+            "GET|https://example.com/api/v1/demo|a=2||",
+            status_code=200,
+            headers={"content-type": "application/json"},
+            body=b"{}",
+            media_type="application/json",
+        )
+
+        cleared = await client.delete("/admin/cache")
+        assert cleared.status_code == 200
+        assert cleared.json()["cleared_entries"] == 1
+
+        status_after = await client.get("/admin/cache")
+        assert status_after.status_code == 200
+        assert status_after.json()["entries"] == 0

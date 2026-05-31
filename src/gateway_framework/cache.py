@@ -64,3 +64,19 @@ class ResponseCache:
 
     def clear(self) -> None:
         self._entries.clear()
+
+    def size(self) -> int:
+        self._purge_expired()
+        return len(self._entries)
+
+    def invalidate_by_contains(self, contains: list[str]) -> int:
+        self._purge_expired()
+        if not contains:
+            return 0
+
+        invalidated = 0
+        for key in list(self._entries.keys()):
+            if all(fragment in key for fragment in contains):
+                self._entries.pop(key, None)
+                invalidated += 1
+        return invalidated

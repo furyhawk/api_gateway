@@ -32,3 +32,27 @@ routes:
     summary: Bus services passthrough
     tags: [Bus]
     operation_id: gateway_bus_services
+
+  - path: /api/v1/bus-routes
+    methods: [GET]
+    upstream: lta_datamall
+    upstream_path: /api/v1/bus-routes
+    summary: Bus routes passthrough
+    tags: [Bus]
+    operation_id: gateway_bus_routes
+
+  - path: /api/v1/bus-stops
+    methods: [GET]
+    upstream: lta_datamall
+    upstream_path: /api/v1/bus-stops
+    summary: Bus stops passthrough
+    tags: [Bus]
+    operation_id: gateway_bus_stops
+
+  - path: /api/v1/passenger-volume/bus
+    methods: [GET]
+    upstream: lta_datamall
+    upstream_path: /api/v1/passenger-volume/bus
+    summary: Bus passenger volume passthrough
+    tags: [Passenger Volume]
+    operation_id: gateway_passenger_volume_bus

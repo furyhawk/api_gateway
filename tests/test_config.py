@@ -74,6 +74,68 @@ routes:
         load_gateway_config(config_file)
 
 
+def test_load_gateway_config_expands_env_with_default(tmp_path, monkeypatch) -> None:
+    monkeypatch.delenv("GATEWAY_UPSTREAM_HOST", raising=False)
+    config_file = tmp_path / "gateway.yaml"
+    config_file.write_text(
+        """
+upstreams:
+  demo:
+    base_url: http://${GATEWAY_UPSTREAM_HOST:-host.docker.internal}/
+routes:
+  - path: /api/v1/demo
+    methods: [GET]
+    upstream: demo
+""".strip(),
+        encoding="utf-8",
+    )
+
+    config = load_gateway_config(config_file)
+
+    assert str(config.upstreams["demo"].base_url) == "http://host.docker.internal/"
+
+
+def test_load_gateway_config_expands_env_override(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("GATEWAY_UPSTREAM_HOST", "host.containers.internal")
+    config_file = tmp_path / "gateway.yaml"
+    config_file.write_text(
+        """
+upstreams:
+  demo:
+    base_url: http://${GATEWAY_UPSTREAM_HOST:-host.docker.internal}/
+routes:
+  - path: /api/v1/demo
+    methods: [GET]
+    upstream: demo
+""".strip(),
+        encoding="utf-8",
+    )
+
+    config = load_gateway_config(config_file)
+
+    assert str(config.upstreams["demo"].base_url) == "http://host.containers.internal/"
+
+
+def test_load_gateway_config_missing_required_env_var_raises(tmp_path, monkeypatch) -> None:
+    monkeypatch.delenv("GATEWAY_UPSTREAM_HOST", raising=False)
+    config_file = tmp_path / "gateway.yaml"
+    config_file.write_text(
+        """
+upstreams:
+  demo:
+    base_url: http://${GATEWAY_UPSTREAM_HOST}/
+routes:
+  - path: /api/v1/demo
+    methods: [GET]
+    upstream: demo
+""".strip(),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Missing required environment variable"):
+        load_gateway_config(config_file)
+
+
 def test_sample_gateway_config_matches_companion_backend_route_set() -> None:
   config = load_gateway_config(Path("config/gateway.yaml"))
 

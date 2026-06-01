@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import os
+import re
 from pathlib import Path
+from typing import Any
 from typing import Literal
 from urllib.parse import urlsplit, urlunsplit
 
@@ -87,6 +90,32 @@ class GatewayConfig(BaseModel):
     routes: list[RouteConfig]
 
 
+_ENV_PLACEHOLDER_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\}")
+
+
+def _expand_env_placeholders(value: str) -> str:
+    def replacer(match: re.Match[str]) -> str:
+        var_name = match.group(1)
+        default_value = match.group(2)
+        if var_name in os.environ:
+            return os.environ[var_name]
+        if default_value is not None:
+            return default_value
+        raise ValueError(f"Missing required environment variable: {var_name}")
+
+    return _ENV_PLACEHOLDER_PATTERN.sub(replacer, value)
+
+
+def _resolve_env_placeholders(value: Any) -> Any:
+    if isinstance(value, str):
+        return _expand_env_placeholders(value)
+    if isinstance(value, list):
+        return [_resolve_env_placeholders(item) for item in value]
+    if isinstance(value, dict):
+        return {key: _resolve_env_placeholders(item) for key, item in value.items()}
+    return value
+
+
 def load_gateway_config(config_path: str | Path) -> GatewayConfig:
     path = Path(config_path)
     if not path.exists():
@@ -95,6 +124,8 @@ def load_gateway_config(config_path: str | Path) -> GatewayConfig:
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict):
         raise ValueError("Gateway config must be a YAML object")
+
+    raw = _resolve_env_placeholders(raw)
 
     try:
         config = GatewayConfig.model_validate(raw)

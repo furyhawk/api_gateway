@@ -39,7 +39,7 @@ uv sync
 
 3. Choose a gateway profile:
 - `config/gateway.yaml` targets a locally running companion backend on `127.0.0.1:8068`.
-- `config/gateway.container.yaml` targets the companion backend inside the bundled compose network, with default `gateway_port: 8067`.
+- `config/gateway.container.yaml` uses `GATEWAY_UPSTREAM_HOST` for host-container networking and defaults to `host.docker.internal` (set `GATEWAY_UPSTREAM_HOST=host.containers.internal` for Podman), with default `gateway_port: 8067`.
 4. Run the gateway with the managed environment:
 
 ```bash
@@ -215,6 +215,7 @@ make stop
 - `CONTAINER_ENGINE=docker` (or `podman`)
 - `PORT=8067`
 - `GATEWAY_PORT=8067`
+- `GATEWAY_UPSTREAM_HOST=host.docker.internal` (set to `host.containers.internal` for Podman host networking)
 - `IMAGE_NAME=openapi-api-gateway`
 - `IMAGE_TAG=latest`
 - `ENV_FILE=.env`

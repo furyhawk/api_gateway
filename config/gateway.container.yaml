@@ -13,7 +13,7 @@ settings:
 
 upstreams:
   lta_datamall:
-    base_url: http://host.containers.internal/
+    base_url: http://host.docker.internal/ # Podman: use http://host.containers.internal/
     port: 8068
     timeout_seconds: 20
 

@@ -72,7 +72,9 @@ async def test_proxy_request_forwards_to_upstream() -> None:
         )
 
     config = GatewayConfig(
-        upstreams={"demo": UpstreamConfig(base_url="https://example.com/", timeout_seconds=5)},
+        upstreams={
+            "demo": UpstreamConfig(base_url="https://example.com/", port=8443, timeout_seconds=5)
+        },
         routes=[],
     )
     route = RouteConfig(path="/api/v1/bus", methods=["GET"], upstream="demo")
@@ -84,7 +86,7 @@ async def test_proxy_request_forwards_to_upstream() -> None:
     assert response.status_code == 200
     assert response.body == b'{"ok":true}'
     assert response.headers.get("connection") is None
-    assert seen["url"] == "https://example.com/api/v1/bus?a=1"
+    assert seen["url"] == "https://example.com:8443/api/v1/bus?a=1"
     assert seen["x_forwarded_proto"] == "http"
     assert seen["x_forwarded_host"] == "gateway.local"
 
@@ -103,7 +105,9 @@ async def test_proxy_request_cache_hit_skips_second_upstream_call() -> None:
 
     config = GatewayConfig(
         settings=GatewaySettings(cache_enabled=True, cache_ttl_seconds=60, cache_max_entries=100),
-        upstreams={"demo": UpstreamConfig(base_url="https://example.com/", timeout_seconds=5)},
+        upstreams={
+            "demo": UpstreamConfig(base_url="https://example.com/", port=8443, timeout_seconds=5)
+        },
         routes=[],
     )
     route = RouteConfig(path="/api/v1/bus", methods=["GET"], upstream="demo")
@@ -136,7 +140,7 @@ async def test_proxy_request_returns_502_when_upstream_unreachable() -> None:
         raise httpx.ConnectError("connection failed", request=req)
 
     config = GatewayConfig(
-        upstreams={"demo": UpstreamConfig(base_url="https://example.com/")},
+        upstreams={"demo": UpstreamConfig(base_url="https://example.com/", port=8443)},
         routes=[],
     )
     route = RouteConfig(path="/api/v1/bus", methods=["GET"], upstream="demo")

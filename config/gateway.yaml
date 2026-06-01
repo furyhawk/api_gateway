@@ -12,7 +12,8 @@ settings:
 
 upstreams:
   lta_datamall:
-    base_url: https://api.example.com/
+    base_url: http://127.0.0.1/
+    port: 8068
     timeout_seconds: 20
 
 routes:

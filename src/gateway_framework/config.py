@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit, urlunsplit
 
 import yaml
 from pydantic import AnyHttpUrl, BaseModel, Field, ValidationError, field_validator
@@ -22,7 +23,22 @@ class GatewaySettings(BaseModel):
 
 class UpstreamConfig(BaseModel):
     base_url: AnyHttpUrl
+    port: int | None = Field(default=None, ge=1, le=65535)
     timeout_seconds: float = Field(default=15.0, ge=0.1, le=120.0)
+
+    def resolved_base_url(self) -> str:
+        url = urlsplit(str(self.base_url))
+        if self.port is None:
+            return str(self.base_url)
+
+        host = url.hostname or ""
+        if url.username:
+            auth = url.username
+            if url.password:
+                auth = f"{auth}:{url.password}"
+            host = f"{auth}@{host}"
+        netloc = f"{host}:{self.port}"
+        return urlunsplit((url.scheme, netloc, url.path, url.query, url.fragment))
 
 
 class RouteConfig(BaseModel):

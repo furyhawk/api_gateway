@@ -66,6 +66,7 @@ settings:
 upstreams:
   service_name:
     base_url: https://service.example.com/
+    port: 8443
     timeout_seconds: 15
 
 routes:
@@ -83,6 +84,7 @@ Notes:
 - `path` is the public gateway path.
 - `upstream_path` overrides forwarded path.
 - `strip_prefix` removes a leading path segment before forwarding.
+- `port` overrides the upstream URL port without changing the host or scheme.
 
 ## Administrative Portal and Dashboard
 - Admin UI: `GET /admin/portal`

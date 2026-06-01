@@ -83,7 +83,7 @@ async def proxy_request(
 ) -> Response:
     upstream = config.upstreams[route.upstream]
     target_path = build_target_path(request, route)
-    target_url = urljoin(str(upstream.base_url), target_path.lstrip("/"))
+    target_url = urljoin(upstream.resolved_base_url(), target_path.lstrip("/"))
 
     cache = None
     cache_key = ""

@@ -14,6 +14,7 @@ settings:
 upstreams:
   demo:
     base_url: https://example.com/
+    port: 8443
 routes:
   - path: /api/v1/demo
     methods: [GET]
@@ -27,6 +28,7 @@ routes:
     assert config.settings.title == "Test Gateway"
     assert "demo" in config.upstreams
     assert config.routes[0].path == "/api/v1/demo"
+    assert config.upstreams["demo"].port == 8443
 
 
 def test_load_gateway_config_unknown_upstream(tmp_path) -> None:
@@ -36,6 +38,7 @@ def test_load_gateway_config_unknown_upstream(tmp_path) -> None:
 upstreams:
   known:
     base_url: https://example.com/
+    port: 8443
 routes:
   - path: /api/v1/demo
     methods: [GET]
@@ -55,6 +58,7 @@ def test_load_gateway_config_invalid_route_path(tmp_path) -> None:
 upstreams:
   demo:
     base_url: https://example.com/
+    port: 8443
 routes:
   - path: api/v1/demo
     methods: [GET]

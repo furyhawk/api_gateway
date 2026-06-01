@@ -15,6 +15,9 @@
 ### Changed
 - Replaced deprecated FastAPI startup/shutdown `on_event` handlers with lifespan.
 - Migrated admin portal tests away from deprecated TestClient usage.
+- Expanded the sample LTA DataMall gateway config to cover all companion backend `/api/v1` bus endpoints.
+- Split gateway upstream targeting into explicit local and container profiles and added a compose workflow for the companion backend.
+- Added a companion OpenAPI parity checker and Makefile target to validate gateway route alignment automatically.
 
 ### Notes
 - The generated API keys file is intentionally gitignored (`config/api_keys.json`).

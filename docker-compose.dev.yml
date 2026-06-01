@@ -1,0 +1,22 @@
+services:
+  lta-datamall-api:
+    build:
+      context: https://github.com/furyhawk/lta_datamall_api.git#main
+    container_name: lta-datamall-api
+    environment:
+      DATAMALL_API_KEY: ${DATAMALL_API_KEY}
+      APP_PORT: 8000
+      VALKEY_ENABLED: "false"
+    ports:
+      - "8068:8000"
+
+  gateway:
+    build:
+      context: .
+    container_name: openapi-api-gateway-dev
+    depends_on:
+      - lta-datamall-api
+    environment:
+      GATEWAY_CONFIG_PATH: config/gateway.container.yaml
+    ports:
+      - "${PORT:-8000}:8000"

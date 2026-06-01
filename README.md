@@ -37,15 +37,55 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-3. Update `config/gateway.yaml` with real upstream URLs.
+3. Choose a gateway profile:
+- `config/gateway.yaml` targets a locally running companion backend on `127.0.0.1:8068`.
+- `config/gateway.container.yaml` targets the companion backend inside the bundled compose network.
 4. Run the gateway with the managed environment:
 
 ```bash
-uv run uvicorn gateway_framework.main:app --reload --app-dir src
+make run-local CONFIG_PROFILE=local
 ```
 
 5. Open the docs:
 - `http://127.0.0.1:8000/docs`
+
+## Companion Backend Integration
+This gateway is a good front door for the companion backend at `furyhawk/lta_datamall_api`.
+
+The gateway now ships with two explicit upstream profiles:
+- `config/gateway.yaml` for a local backend on `http://127.0.0.1:8068`
+- `config/gateway.container.yaml` for the compose service `http://lta-datamall-api:8000`
+
+Both profiles are aligned to the companion backend's published route surface:
+- public route prefix: `/api/v1`
+- backend health endpoints remain available at `/healthz` and `/readyz`
+
+One-command profile selection:
+- Local host pairing: `make run-local CONFIG_PROFILE=local`
+- Containerized gateway: `make run CONFIG_PROFILE=container`
+- Route parity check against the running companion backend OpenAPI: `make check-companion-parity CONFIG_PROFILE=local`
+
+Suggested local pairing workflow:
+1. Run `furyhawk/lta_datamall_api` on port `8068`.
+2. Start this gateway with `make run-local CONFIG_PROFILE=local`.
+3. Use this gateway for edge concerns such as admin config editing, gateway API keys, and response caching while the companion backend owns the LTA DataMall domain logic.
+
+## Integrated Dev Compose Workflow
+Use the bundled compose file when you want this repo to start both the gateway and the companion backend together.
+
+1. Create `.env` from `.env.example` and set `DATAMALL_API_KEY`.
+2. Start the stack:
+
+```bash
+make compose-up
+```
+
+3. Open the gateway at `http://127.0.0.1:8000`.
+
+Notes:
+- `make compose-up` starts the companion backend first, checks its live `/openapi.json`, then starts the gateway.
+- The compose workflow uses Docker Compose because the companion backend is built directly from its Git repository.
+- Tail logs with `make compose-logs` and stop the stack with `make compose-down`.
 
 ## Configuration Model
 `config/gateway.yaml` uses this model:
@@ -148,10 +188,12 @@ make build
 
 ### Run Container
 ```bash
-make run
+make run CONFIG_PROFILE=local
 ```
 
 Gateway will be available at `http://127.0.0.1:8000`.
+
+Use `CONFIG_PROFILE=container` when the upstream backend is running inside the compose network.
 
 ### Stop and Inspect
 ```bash
@@ -169,7 +211,7 @@ make stop
 Example:
 ```bash
 make build CONTAINER_ENGINE=docker IMAGE_TAG=dev
-make run CONTAINER_ENGINE=docker PORT=8080 ENV_FILE=.env
+make run CONTAINER_ENGINE=docker PORT=8080 ENV_FILE=.env CONFIG_PROFILE=local
 ```
 
 ## GitHub Packages (GHCR)

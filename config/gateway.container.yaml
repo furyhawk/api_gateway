@@ -1,6 +1,6 @@
 settings:
   title: LTA DataMall API Gateway
-  version: 0.2.0
+  version: 0.2.1
   description: Configurable gateway for OpenAPI-based upstream services
   external_openapi_file: openapi_json/lta_datamall_openapi_v0-1-1.json
   cache_enabled: true

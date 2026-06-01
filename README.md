@@ -216,11 +216,11 @@ make run CONTAINER_ENGINE=docker PORT=8080 ENV_FILE=.env CONFIG_PROFILE=local
 
 ## GitHub Packages (GHCR)
 - Automated image publishing is configured in `.github/workflows/release-image.yml`.
-- On push of a release tag (for example `v0.2.0`), CI builds and pushes:
-  - `ghcr.io/furyhawk/api_gateway:v0.2.0`
+- On push of a release tag (for example `v0.2.1`), CI builds and pushes:
+  - `ghcr.io/furyhawk/api_gateway:v0.2.1`
   - `ghcr.io/furyhawk/api_gateway:latest`
 
 Pull example:
 ```bash
-docker pull ghcr.io/furyhawk/api_gateway:v0.2.0
+docker pull ghcr.io/furyhawk/api_gateway:v0.2.1
 ```

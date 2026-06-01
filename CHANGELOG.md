@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.1 - 2026-06-01
+
+### Added
+- Companion backend route-parity checker with a dedicated test module.
+- Integrated dev compose workflow for running the companion backend behind the gateway.
+
+### Changed
+- Split gateway upstream targeting into local and container config profiles.
+- Expanded the sample LTA DataMall gateway config to cover all companion backend `/api/v1` bus endpoints.
+- Documented one-command profile selection and companion integration workflows.
+
 ## 0.2.0 - 2026-05-31
 
 ### Added

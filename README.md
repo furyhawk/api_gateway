@@ -39,7 +39,7 @@ uv sync
 
 3. Choose a gateway profile:
 - `config/gateway.yaml` targets a locally running companion backend on `127.0.0.1:8068`.
-- `config/gateway.container.yaml` targets the companion backend inside the bundled compose network.
+- `config/gateway.container.yaml` targets the companion backend inside the bundled compose network, with default `gateway_port: 8067`.
 4. Run the gateway with the managed environment:
 
 ```bash
@@ -48,6 +48,12 @@ make run-local CONFIG_PROFILE=local
 
 5. Open the docs:
 - `http://127.0.0.1:8000/docs`
+
+To run on a different gateway port, pass `GATEWAY_PORT`:
+
+```bash
+make run-local CONFIG_PROFILE=local GATEWAY_PORT=8088
+```
 
 ## Companion Backend Integration
 This gateway is a good front door for the companion backend at `furyhawk/lta_datamall_api`.
@@ -82,6 +88,8 @@ make compose-up
 
 3. Open the gateway at `http://127.0.0.1:8000`.
 
+If you use the repository defaults from `.env.example`, the gateway is exposed on port `8067`.
+
 Notes:
 - `make compose-up` starts the companion backend first, checks its live `/openapi.json`, then starts the gateway.
 - The compose workflow uses Docker Compose because the companion backend is built directly from its Git repository.
@@ -95,6 +103,7 @@ settings:
   title: string
   version: string
   description: string
+  gateway_port: 8067
   external_openapi_file: path/to/openapi.json
   cache_enabled: false
   cache_ttl_seconds: 30
@@ -125,6 +134,7 @@ Notes:
 - `upstream_path` overrides forwarded path.
 - `strip_prefix` removes a leading path segment before forwarding.
 - `port` overrides the upstream URL port without changing the host or scheme.
+- `settings.gateway_port` controls the gateway listen port unless `GATEWAY_PORT` (or `PORT`) is set.
 
 ## Administrative Portal and Dashboard
 - Admin UI: `GET /admin/portal`
@@ -203,7 +213,8 @@ make stop
 
 ### Useful Variables
 - `CONTAINER_ENGINE=docker` (or `podman`)
-- `PORT=8080`
+- `PORT=8067`
+- `GATEWAY_PORT=8067`
 - `IMAGE_NAME=openapi-api-gateway`
 - `IMAGE_TAG=latest`
 - `ENV_FILE=.env`
@@ -211,7 +222,7 @@ make stop
 Example:
 ```bash
 make build CONTAINER_ENGINE=docker IMAGE_TAG=dev
-make run CONTAINER_ENGINE=docker PORT=8080 ENV_FILE=.env CONFIG_PROFILE=local
+make run CONTAINER_ENGINE=docker PORT=8080 GATEWAY_PORT=8080 ENV_FILE=.env CONFIG_PROFILE=local
 ```
 
 ## GitHub Packages (GHCR)

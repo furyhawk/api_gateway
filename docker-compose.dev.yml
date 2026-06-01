@@ -18,5 +18,6 @@ services:
       - lta-datamall-api
     environment:
       GATEWAY_CONFIG_PATH: config/gateway.container.yaml
+      GATEWAY_PORT: ${PORT:-8000}
     ports:
-      - "${PORT:-8000}:8000"
+      - "${PORT:-8000}:${PORT:-8000}"

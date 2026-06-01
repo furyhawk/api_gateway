@@ -16,4 +16,4 @@ COPY openapi_json ./openapi_json
 
 EXPOSE 8000
 
-CMD ["uv", "run", "uvicorn", "gateway_framework.main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "src"]
+CMD ["uv", "run", "python", "-m", "gateway_framework.main"]

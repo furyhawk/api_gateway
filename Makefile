@@ -5,6 +5,7 @@ IMAGE_NAME ?= openapi-api-gateway
 IMAGE_TAG ?= latest
 CONTAINER_NAME ?= openapi-api-gateway
 PORT ?= 8000
+GATEWAY_PORT ?= $(PORT)
 ENV_FILE ?= .env
 CONFIG_PROFILE ?= local
 COMPOSE_FILE ?= docker-compose.dev.yml
@@ -46,14 +47,15 @@ run:
 	$(MAKE) stop >/dev/null 2>&1 || true
 	$(CONTAINER_ENGINE) run -d \
 		--name $(CONTAINER_NAME) \
-		-p $(PORT):8000 \
+		-p $(PORT):$(GATEWAY_PORT) \
 		-e GATEWAY_CONFIG_PATH=$(GATEWAY_CONFIG_PATH) \
+		-e GATEWAY_PORT=$(GATEWAY_PORT) \
 		$(RUN_ENV) \
 		$(IMAGE_NAME):$(IMAGE_TAG)
-	@echo "Gateway is running on http://127.0.0.1:$(PORT) using $(GATEWAY_CONFIG_PATH)"
+	@echo "Gateway is running on http://127.0.0.1:$(PORT) using $(GATEWAY_CONFIG_PATH) (bind port $(GATEWAY_PORT))"
 
 run-local:
-	GATEWAY_CONFIG_PATH=$(GATEWAY_CONFIG_PATH) uv run uvicorn gateway_framework.main:app --host 0.0.0.0 --port $(PORT) --reload --app-dir src
+	GATEWAY_CONFIG_PATH=$(GATEWAY_CONFIG_PATH) GATEWAY_PORT=$(GATEWAY_PORT) uv run python -m gateway_framework.main
 
 stop:
 	-$(CONTAINER_ENGINE) rm -f $(CONTAINER_NAME)

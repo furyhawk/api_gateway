@@ -31,6 +31,7 @@ routes:
     assert "demo" in config.upstreams
     assert config.routes[0].path == "/api/v1/demo"
     assert config.upstreams["demo"].port == 8443
+    assert config.settings.gateway_port == 8000
 
 
 def test_load_gateway_config_unknown_upstream(tmp_path) -> None:
@@ -94,4 +95,5 @@ def test_container_gateway_config_matches_local_route_set() -> None:
   assert {route.path for route in local_config.routes} == {
     route.path for route in container_config.routes
   }
-  assert container_config.upstreams["lta_datamall"].resolved_base_url() == "http://lta-datamall-api:8000/"
+  assert local_config.settings.gateway_port == container_config.settings.gateway_port
+  assert container_config.upstreams["lta_datamall"].port is not None

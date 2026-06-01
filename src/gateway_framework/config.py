@@ -12,6 +12,7 @@ class GatewaySettings(BaseModel):
     title: str = "OpenAPI API Gateway"
     version: str = "0.1.0"
     description: str = "Configurable API gateway"
+    gateway_port: int = Field(default=8000, ge=1, le=65535)
     external_openapi_file: str | None = None
     cache_enabled: bool = False
     cache_ttl_seconds: float = Field(default=30.0, ge=1.0, le=3600.0)

@@ -74,15 +74,15 @@ check-companion-parity:
 	uv run python -m gateway_framework.companion --config $(GATEWAY_CONFIG_PATH) --openapi $(COMPANION_OPENAPI)
 
 compose-up:
-	docker compose -f $(COMPOSE_FILE) up --build -d lta-datamall-api
+	$(CONTAINER_ENGINE) compose -f $(COMPOSE_FILE) up --build -d lta-datamall-api
 	$(MAKE) check-companion-parity CONFIG_PROFILE=container
-	docker compose -f $(COMPOSE_FILE) up --build -d gateway
+	$(CONTAINER_ENGINE) compose -f $(COMPOSE_FILE) up --build -d gateway
 
 compose-down:
-	docker compose -f $(COMPOSE_FILE) down --remove-orphans
+	$(CONTAINER_ENGINE) compose -f $(COMPOSE_FILE) down --remove-orphans
 
 compose-logs:
-	docker compose -f $(COMPOSE_FILE) logs -f
+	$(CONTAINER_ENGINE) compose -f $(COMPOSE_FILE) logs -f
 
 fmt:
 	uv run ruff check .

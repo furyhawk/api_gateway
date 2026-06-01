@@ -12,8 +12,8 @@ settings:
 
 upstreams:
   lta_datamall:
-    base_url: http://lta-datamall-api/
-    port: 8000
+    base_url: http://host.containers.internal/
+    port: 8068
     timeout_seconds: 20
 
 routes:
